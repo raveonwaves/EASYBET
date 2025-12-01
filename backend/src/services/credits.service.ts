@@ -7,7 +7,12 @@ type CreditTransactionType =
   | 'referral_bonus'
   | 'admin_bonus';
 
-export const addCredits = async (userId: string, amount: number, type: CreditTransactionType, metadata?: Record<string, unknown>) => {
+export const addCredits = async (
+  userId: string,
+  amount: number,
+  type: CreditTransactionType,
+  metadata?: Prisma.InputJsonValue
+) => {
   const user = await prisma.user.update({
     where: { id: userId },
     data: {
@@ -16,7 +21,7 @@ export const addCredits = async (userId: string, amount: number, type: CreditTra
         create: {
           amount,
           type,
-          metadata: metadata as Prisma.InputJsonValue
+          metadata
         }
       }
     }
@@ -24,7 +29,12 @@ export const addCredits = async (userId: string, amount: number, type: CreditTra
   return user.creditsBalance;
 };
 
-export const subtractCredits = async (userId: string, amount: number, type: CreditTransactionType, metadata?: Record<string, unknown>) => {
+export const subtractCredits = async (
+  userId: string,
+  amount: number,
+  type: CreditTransactionType,
+  metadata?: Prisma.InputJsonValue
+) => {
   return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
     if (user.creditsBalance < amount) {
@@ -38,7 +48,7 @@ export const subtractCredits = async (userId: string, amount: number, type: Cred
           create: {
             amount: -amount,
             type,
-            metadata: metadata as Prisma.InputJsonValue
+            metadata
           }
         }
       }
