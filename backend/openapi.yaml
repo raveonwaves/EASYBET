@@ -1,0 +1,46 @@
+openapi: 3.0.1
+info:
+  title: Easy Bet API
+  version: 0.1.0
+servers:
+  - url: /api
+paths:
+  /user/init:
+    post:
+      security:
+        - TelegramInitData: []
+      summary: Init user via Telegram
+      responses:
+        '200':
+          description: OK
+  /payment/create:
+    post:
+      security:
+        - TelegramInitData: []
+      summary: Create crypto payment
+      responses:
+        '200':
+          description: OK
+  /payment/webhook/{provider}:
+    post:
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema:
+            type: string
+      summary: Provider webhook
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    TelegramInitData:
+      type: apiKey
+      in: header
+      name: x-telegram-init
+    AdminToken:
+      type: apiKey
+      in: header
+      name: x-admin-token
+

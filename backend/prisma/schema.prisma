@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String              @id @default(uuid())
+  telegramId     BigInt              @unique
+  username       String?
+  firstName      String?
+  lastName       String?
+  referralCode   String              @unique
+  invitedById    String?
+  invitedBy      User?               @relation("UserInvites", fields: [invitedById], references: [id])
+  invitations    User[]              @relation("UserInvites")
+  creditsBalance Int                 @default(0)
+  unlocked       UnlockedContent[]
+  creditsLogs    CreditsTransaction[]
+  payments       CryptoPayment[]
+  referrals      Referral[]          @relation("ReferralsAsInviter")
+  referred       Referral[]          @relation("ReferralsAsInvitee")
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model CreditsTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  type      String
+  reference String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model Content {
+  id            String             @id @default(uuid())
+  title         String
+  description   String
+  priceCredits  Int
+  assetKey      String
+  storagePath   String
+  unlocksAt     DateTime?
+  publicAt      DateTime?
+  createdAt     DateTime           @default(now())
+  unlockedUsers UnlockedContent[]
+}
+
+model UnlockedContent {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  contentId  String
+  content    Content  @relation(fields: [contentId], references: [id])
+  unlockedAt DateTime @default(now())
+  expiresAt  DateTime?
+}
+
+model CryptoPayment {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  chain      String
+  asset      String
+  address    String
+  memo       String?
+  amount     Float?
+  amountUsd  Float?
+  credits    Int?
+  txHash     String?  @unique
+  status     String   @default("pending")
+  rawPayload Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Referral {
+  id           String   @id @default(uuid())
+  inviterId    String
+  inviter      User     @relation("ReferralsAsInviter", fields: [inviterId], references: [id])
+  inviteeId    String
+  invitee      User     @relation("ReferralsAsInvitee", fields: [inviteeId], references: [id])
+  bonusApplied Boolean  @default(false)
+  bonusInviter Int? 
+  bonusInvitee Int?
+  createdAt    DateTime @default(now())
+
+  @@unique([inviterId, inviteeId], name: "inviterId_inviteeId")
+}
+
+model AdminLog {
+  id        String   @id @default(uuid())
+  adminUser String
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
