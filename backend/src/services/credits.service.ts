@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 
 type CreditTransactionType =
@@ -11,7 +10,7 @@ export const addCredits = async (
   userId: string,
   amount: number,
   type: CreditTransactionType,
-  metadata?: Prisma.InputJsonValue
+  metadata?: Record<string, unknown>
 ) => {
   const user = await prisma.user.update({
     where: { id: userId },
@@ -21,7 +20,7 @@ export const addCredits = async (
         create: {
           amount,
           type,
-          metadata
+          metadata: metadata as any
         }
       }
     }
@@ -33,9 +32,9 @@ export const subtractCredits = async (
   userId: string,
   amount: number,
   type: CreditTransactionType,
-  metadata?: Prisma.InputJsonValue
+  metadata?: Record<string, unknown>
 ) => {
-  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
     if (user.creditsBalance < amount) {
       throw new Error('Insufficient credits');
@@ -48,7 +47,7 @@ export const subtractCredits = async (
           create: {
             amount: -amount,
             type,
-            metadata
+            metadata: metadata as any
           }
         }
       }
