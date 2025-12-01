@@ -16,7 +16,7 @@ export const addCredits = async (userId: string, amount: number, type: CreditTra
         create: {
           amount,
           type,
-          metadata
+          metadata: metadata as Prisma.InputJsonValue
         }
       }
     }
@@ -38,7 +38,7 @@ export const subtractCredits = async (userId: string, amount: number, type: Cred
           create: {
             amount: -amount,
             type,
-            metadata
+            metadata: metadata as Prisma.InputJsonValue
           }
         }
       }

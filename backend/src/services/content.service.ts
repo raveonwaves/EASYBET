@@ -13,7 +13,7 @@ export const listContents = async (userId: string) => {
     })
   ]);
   const unlockedIds = new Set(unlocked.map((c: { contentId: string }) => c.contentId));
-  return contents.map((content) => ({
+  return contents.map((content: Awaited<ReturnType<typeof prisma.content.findMany>>[0]) => ({
     ...content,
     unlocked: unlockedIds.has(content.id) || Boolean(content.publicAt && dayjs(content.publicAt).isBefore(dayjs())),
     unlocksAt: content.unlocksAt,
