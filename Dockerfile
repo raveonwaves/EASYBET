@@ -1,6 +1,6 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-COPY backend/package.json backend/package-lock.json* backend/pnpm-lock.yaml* backend/yarn.lock* ./
+COPY backend/package.json backend/package-lock.json* ./
 RUN npm install
 COPY backend/ .
 RUN npm run build
@@ -12,4 +12,3 @@ COPY --from=base /app/dist ./dist
 COPY --from=base /app/prisma ./prisma
 ENV NODE_ENV=production
 CMD ["node", "dist/index.js"]
-
