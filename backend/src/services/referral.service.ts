@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { addCredits } from './credits.service.js';
@@ -24,7 +25,7 @@ export const applyReferralBonus = async (inviteeId: string) => {
     return null;
   }
 
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const invitee = await tx.user.findUniqueOrThrow({ where: { id: inviteeId } });
     const inviter = referral.inviter;
     if (!inviter) {

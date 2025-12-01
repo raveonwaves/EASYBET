@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 
 type CreditTransactionType =
@@ -24,7 +25,7 @@ export const addCredits = async (userId: string, amount: number, type: CreditTra
 };
 
 export const subtractCredits = async (userId: string, amount: number, type: CreditTransactionType, metadata?: Record<string, unknown>) => {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
     if (user.creditsBalance < amount) {
       throw new Error('Insufficient credits');

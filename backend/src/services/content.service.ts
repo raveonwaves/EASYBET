@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { signContentUrl } from '../utils/contentSigner.js';
 import { subtractCredits } from './credits.service.js';
@@ -11,7 +12,7 @@ export const listContents = async (userId: string) => {
       select: { contentId: true }
     })
   ]);
-  const unlockedIds = new Set(unlocked.map((c) => c.contentId));
+  const unlockedIds = new Set(unlocked.map((c: { contentId: string }) => c.contentId));
   return contents.map((content) => ({
     ...content,
     unlocked: unlockedIds.has(content.id) || Boolean(content.publicAt && dayjs(content.publicAt).isBefore(dayjs())),
@@ -21,7 +22,7 @@ export const listContents = async (userId: string) => {
 };
 
 export const unlockContent = async (userId: string, contentId: string) => {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const content = await tx.content.findUniqueOrThrow({ where: { id: contentId } });
 
     if (content.publicAt && dayjs(content.publicAt).isBefore(new Date())) {
